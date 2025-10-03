@@ -1,23 +1,17 @@
 import type { NextConfig } from "next";
 
-import next_pwa from "next-pwa";
-
 const nextConfig: NextConfig = {
-    //eslint: {
-        // ⚠️ Внимание: это позволяет сборке завершиться успешно даже при ошибках ESLint
-        //ignoreDuringBuilds: true,
-    //},
+    // Включим поддержку PWA
+    experimental: {
+        esmExternals: true
+    }
 };
 
-export default nextConfig;
-
-const withPWA = next_pwa({
-    dest: 'public', // сюда генерится service worker
+const withPWA = require("next-pwa")({
+    dest: "public",
     register: true,
-    skipWaiting: true
-})
+    skipWaiting: true,
+    disable: process.env.NODE_ENV === "development", // Отключаем в development для удобства
+});
 
-module.exports = withPWA({
-    reactStrictMode: true
-})
-
+module.exports = withPWA(nextConfig);
