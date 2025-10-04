@@ -13,7 +13,6 @@ const geistMono = Geist_Mono({
     subsets: ["latin"],
 });
 
-// Viewport конфигурация для PWA
 export const viewport: Viewport = {
     width: "device-width",
     initialScale: 1,
@@ -25,22 +24,15 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
     title: "Исторический портал Кубани",
     description: "Изучение истории Кубани",
-    manifest: "/manifest.json",
+    manifest: "/manifest.json", // Убедитесь, что путь правильный
     themeColor: "#92400e",
     appleWebApp: {
         capable: true,
         statusBarStyle: "default",
         title: "История Кубани",
     },
-    // Добавляем дополнительные мета-теги для PWA
     keywords: ["история", "Кубань", "образование", "PWA"],
     authors: [{ name: "Исторический портал Кубани" }],
-    openGraph: {
-        type: "website",
-        siteName: "Исторический портал Кубани",
-        title: "Исторический портал Кубани",
-        description: "Изучение истории Кубани",
-    },
 };
 
 export default function RootLayout({
@@ -51,17 +43,15 @@ export default function RootLayout({
     return (
         <html lang="ru">
         <head>
-            {/* Добавляем meta-теги для iOS */}
             <meta name="apple-mobile-web-app-capable" content="yes" />
             <meta name="apple-mobile-web-app-status-bar-style" content="default" />
             <meta name="apple-mobile-web-app-title" content="История Кубани" />
             <link rel="apple-touch-icon" href="/icons/icon_192x192.png" />
 
-            {/* Добавляем meta-теги для Microsoft */}
             <meta name="msapplication-TileColor" content="#92400e" />
             <meta name="msapplication-config" content="/browserconfig.xml" />
 
-            {/* Добавляем link для манифеста */}
+            {/* Убедитесь, что ссылка на манифест правильная */}
             <link rel="manifest" href="/manifest.json" />
         </head>
         <body
