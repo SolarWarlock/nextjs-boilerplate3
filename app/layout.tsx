@@ -43,8 +43,8 @@ export const metadata: Metadata = {
         images: [
             {
                 url: "/images/screen.png",
-                width: 1080,
-                height: 1928,
+                width: 717,
+                height: 1280,
                 alt: "Исторический портал Кубани",
             },
         ],

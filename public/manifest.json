@@ -61,10 +61,10 @@
   ],
   "screenshots": [
     {
-      "src": "/images/screen.png",
-      "sizes": "1080x1928",
+      "src": "/images/screen",
+      "sizes": "717x1280",
       "type": "image/png",
-      "form_factor": "wide",
+      "form_factor": "narrow",
       "label": "Главная страница исторического портала"
     }
   ]
