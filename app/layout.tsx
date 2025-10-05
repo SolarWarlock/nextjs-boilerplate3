@@ -23,16 +23,32 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
     title: "Исторический портал Кубани",
-    description: "Изучение истории Кубани",
-    manifest: "/manifest.json", // Убедитесь, что путь правильный
+    description: "Изучение истории Кубани - от древних цивилизаций до современности",
+    manifest: "/manifest.json",
     themeColor: "#92400e",
     appleWebApp: {
         capable: true,
         statusBarStyle: "default",
         title: "История Кубани",
     },
-    keywords: ["история", "Кубань", "образование", "PWA"],
+    // Добавьте для лучшего отображения в магазинах приложений
+    applicationName: "Исторический портал Кубани",
+    keywords: ["история", "Кубань", "образование", "учеба", "культура"],
     authors: [{ name: "Исторический портал Кубани" }],
+    openGraph: {
+        type: "website",
+        siteName: "Исторический портал Кубани",
+        title: "Исторический портал Кубани",
+        description: "Изучение истории Кубани - интерактивные материалы и тесты",
+        images: [
+            {
+                url: "/images/screen.png",
+                width: 1080,
+                height: 1928,
+                alt: "Исторический портал Кубани",
+            },
+        ],
+    },
 };
 
 export default function RootLayout({
