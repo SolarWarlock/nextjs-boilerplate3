@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "platform.TKAB.app1234",
+        "sha256_cert_fingerprints": ["2D:9B:20:39:CB:AB:BF:3B:9B:5B:AB:31:95:65:70:3C:B1:92:CE:0B:BF:28:1B:4B:24:64:04:51:9A:E3:5A:68"]
+      }
+    }]
