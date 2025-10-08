@@ -3,185 +3,6 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
-
-// Функция для создания PDF с результатами теста
-const generateTestPDF = async (sectionTitle: string, score: number, totalQuestions: number, percentage: number, questions: any[], userAnswers: any[]) => {
-    try {
-        // Создаем временный элемент для рендеринга
-        const element = document.createElement('div');
-        element.style.width = '210mm'; // A4 width
-        element.style.padding = '20px';
-        element.style.backgroundColor = '#fefce8';
-        element.style.fontFamily = 'Arial, sans-serif';
-
-        // Форматируем дату
-        const now = new Date();
-        const dateStr = now.toLocaleDateString('ru-RU');
-        const timeStr = now.toLocaleTimeString('ru-RU');
-
-        // Создаем HTML для PDF
-        element.innerHTML = `
-      <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #d97706; padding-bottom: 20px;">
-        <h1 style="color: #92400e; margin: 0 0 10px 0;">Результаты теста</h1>
-        <h2 style="color: #b45309; margin: 0 0 15px 0;">${sectionTitle}</h2>
-        <div style="display: flex; justify-content: center; gap: 30px; font-size: 16px;">
-          <div>Дата: ${dateStr}</div>
-          <div>Время: ${timeStr}</div>
-        </div>
-      </div>
-
-      <div style="text-align: center; margin-bottom: 40px; background: #fef3c7; padding: 20px; border-radius: 10px;">
-        <div style="font-size: 48px; margin-bottom: 10px;">
-          ${percentage >= 80 ? '🎉' : percentage >= 60 ? '👍' : '📚'}
-        </div>
-        <div style="font-size: 24px; color: #92400e; margin-bottom: 10px;">
-          Результат: ${score} из ${totalQuestions}
-        </div>
-        <div style="font-size: 20px; color: ${percentage >= 80 ? '#059669' :
-            percentage >= 60 ? '#d97706' : '#dc2626'
-        };">
-          ${percentage}% - ${percentage >= 80 ? 'Отлично' :
-            percentage >= 60 ? 'Хорошо' : 'Нужно повторить материал'
-        }
-        </div>
-      </div>
-
-      <div style="margin-bottom: 40px;">
-        <h3 style="color: #92400e; border-bottom: 1px solid #d97706; padding-bottom: 10px;">
-          Детализация ответов:
-        </h3>
-        ${questions.map((question, index) => {
-            const userAnswer = userAnswers[index];
-            const isCorrect = checkAnswer(question, userAnswer);
-
-            const formatAnswer = (q: any, answer: any) => {
-                switch (q.type) {
-                    case 'single':
-                        return q.options[answer as number] || 'Нет ответа';
-                    case 'multiple':
-                        return (answer as number[] || []).map((idx: number) => q.options[idx]).join(', ') || 'Нет ответа';
-                    case 'text':
-                        return answer as string || 'Нет ответа';
-                    case 'matching':
-                        return (answer as any[] || []).map((match: any) => `${match.leftId}→${match.rightId}`).join(', ') || 'Нет ответа';
-                    default:
-                        return 'Нет ответа';
-                }
-            };
-
-            const formatCorrect = (q: any) => {
-                switch (q.type) {
-                    case 'single':
-                        return q.options[q.correctAnswer];
-                    case 'multiple':
-                        return q.correctAnswers.map((idx: number) => q.options[idx]).join(', ');
-                    case 'text':
-                        return q.correctAnswer;
-                    case 'matching':
-                        return q.correctMatches.map((match: any) => `${match.leftId}→${match.rightId}`).join(', ');
-                    default:
-                        return '';
-                }
-            };
-
-            return `
-            <div style="margin-bottom: 25px; padding: 15px; background: ${isCorrect ? '#f0fdf4' : '#fef2f2'}; border-radius: 8px; border-left: 4px solid ${isCorrect ? '#10b981' : '#ef4444'};">
-              <div style="display: flex; align-items: start; margin-bottom: 10px;">
-                <span style="color: ${isCorrect ? '#10b981' : '#ef4444'}; font-weight: bold; margin-right: 10px;">
-                  ${isCorrect ? '✓' : '✗'} ${index + 1}.
-                </span>
-                <div style="flex: 1;">
-                  <div style="font-weight: bold; margin-bottom: 8px; color: #1f2937;">
-                    ${question.question}
-                  </div>
-                  <div style="font-size: 14px; color: #6b7280; margin-bottom: 5px;">
-                    <strong>Ваш ответ:</strong> ${formatAnswer(question, userAnswer)}
-                  </div>
-                  ${!isCorrect ? `
-                    <div style="font-size: 14px; color: #059669;">
-                      <strong>Правильный ответ:</strong> ${formatCorrect(question)}
-                    </div>
-                  ` : ''}
-                </div>
-              </div>
-              <div style="font-size: 13px; color: #6b7280; background: white; padding: 10px; border-radius: 5px; border-left: 3px solid #d97706;">
-                <strong>Объяснение:</strong> ${question.explanation}
-              </div>
-            </div>
-          `;
-        }).join('')}
-      </div>
-
-
-    `;
-
-        // Добавляем элемент в DOM
-        document.body.appendChild(element);
-
-        // Создаем canvas из элемента
-        const canvas = await html2canvas(element, {
-            scale: 2, // Увеличиваем качество
-            useCORS: true,
-            allowTaint: true,
-            backgroundColor: '#fefce8'
-        });
-
-        // Удаляем временный элемент
-        document.body.removeChild(element);
-
-        // Создаем PDF
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        const imgWidth = 210; // A4 width in mm
-        const pageHeight = 295; // A4 height in mm
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-        let heightLeft = imgHeight;
-        let position = 0;
-
-        // Добавляем первую страницу
-        pdf.addImage(canvas, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-
-        // Добавляем дополнительные страницы если нужно
-        while (heightLeft >= 0) {
-            position = heightLeft - imgHeight;
-            pdf.addPage();
-            pdf.addImage(canvas, 'PNG', 0, position, imgWidth, imgHeight);
-            heightLeft -= pageHeight;
-        }
-
-        // Сохраняем PDF
-        pdf.save(`Результаты теста - ${sectionTitle} - ${dateStr}.pdf`);
-
-    } catch (error) {
-        console.error('Ошибка при создании PDF:', error);
-        alert('Произошла ошибка при создании PDF файла');
-    }
-};
-// Функция для проверки ответов (должна быть доступна в области видимости)
-const checkAnswer = (question: Question, userAnswer: any): boolean => {
-    switch (question.type) {
-        case 'single':
-            return userAnswer === (question as SingleChoiceQuestion).correctAnswer;
-        case 'multiple':
-            return JSON.stringify([...(userAnswer || [])].sort()) ===
-                JSON.stringify([...(question as MultipleChoiceQuestion).correctAnswers].sort());
-        case 'text':
-            const textQuestion = question as TextAnswerQuestion;
-            if (textQuestion.caseSensitive) {
-                return (userAnswer || '').trim() === textQuestion.correctAnswer;
-            }
-            return (userAnswer || '').trim().toLowerCase() === textQuestion.correctAnswer.toLowerCase();
-        case 'matching':
-            return JSON.stringify([...(userAnswer || [])].sort((a: any, b: any) => a.leftId - b.leftId)) ===
-                JSON.stringify([...(question as MatchingQuestion).correctMatches].sort((a: any, b: any) => a.leftId - b.leftId));
-        default:
-            return false;
-    }
-};
-
 // Custom SVG icon components
 const ArrowLeft = ({ className }: { className?: string }) => (
     <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -239,13 +60,6 @@ const BookOpen = ({ className }: { className?: string }) => (
         <path d="M18 8v13" />
     </svg>
 );
-
-
-interface InlineImage {
-    url: string;
-    caption: string;
-    alt: string;
-}
 
 // Базовый интерфейс для всех типов вопросов
 interface BaseQuestion {
@@ -305,7 +119,6 @@ interface Topic {
     contentFile: string; // Путь к текстовому файлу с контентом
 }
 
-
 const TopicContent: React.FC<{ topic: Topic }> = ({ topic }) => {
     const { content, loading, error } = useTopicContent(topic.contentFile);
 
@@ -328,8 +141,6 @@ const TopicContent: React.FC<{ topic: Topic }> = ({ topic }) => {
 
     return <FormattedText content={content} />;
 };
-
-
 
 const useTopicContent = (contentFile: string | null) => {
     const [content, setContent] = useState<string>('');
@@ -442,7 +253,6 @@ const useGlossary = (glossaryFile: string | null) => {
     return { glossary, loading, error };
 };
 
-
 interface Section {
     id: string;
     title: string;
@@ -452,9 +262,6 @@ interface Section {
     quizFile: string;
     glossaryFile: string;
 }
-
-
-
 
 const MarkdownImageComponent: React.FC<{
     src: string;
@@ -551,8 +358,6 @@ const MarkdownImageComponent: React.FC<{
     );
 };
 
-
-
 const MarkdownVideoComponent: React.FC<{
     src: string;
     alt?: string;
@@ -637,7 +442,6 @@ const MarkdownVideoComponent: React.FC<{
     );
 };
 
-
 const FormattedText: React.FC<{ content: string }> = ({ content }) => {
     const parseContent = (text: string) => {
         // Обновляем регулярное выражение для поддержки выравнивания: ![alt](src,align "caption")
@@ -717,7 +521,7 @@ const FormattedText: React.FC<{ content: string }> = ({ content }) => {
         return (
             <div
                 key={`text-${Math.random()}`}
-                className="whitespace-pre-line mb-4"
+                className="whitespace-pre-line mb-4 text-lg leading-relaxed text-black"
                 dangerouslySetInnerHTML={{ __html: formattedText }}
             />
         );
@@ -731,12 +535,6 @@ const FormattedText: React.FC<{ content: string }> = ({ content }) => {
         </div>
     );
 };
-
-// Функция для парсинга контента с форматированием и изображениями
-
-
-
-
 
 // Компоненты для различных типов вопросов
 
@@ -752,8 +550,8 @@ const SingleChoiceQuestionComponent: React.FC<{
                 <button
                     key={index}
                     className={`w-full text-left p-4 rounded-md border transition-all ${selectedAnswer === index
-                        ? 'border-amber-600 bg-amber-200 text-amber-900'
-                        : 'border-amber-300 hover:border-amber-400 hover:bg-amber-200 text-amber-800'
+                        ? 'border-amber-600 bg-amber-200 text-black'
+                        : 'border-amber-300 hover:border-amber-400 hover:bg-amber-200 text-black'
                     }`}
                     onClick={() => onAnswerSelect(index)}
                 >
@@ -786,8 +584,8 @@ const MultipleChoiceQuestionComponent: React.FC<{
                 <button
                     key={index}
                     className={`w-full text-left p-4 rounded-md border transition-all ${selectedAnswers.includes(index)
-                        ? 'border-amber-600 bg-amber-200 text-amber-900'
-                        : 'border-amber-300 hover:border-amber-400 hover:bg-amber-200 text-amber-800'
+                        ? 'border-amber-600 bg-amber-200 text-black'
+                        : 'border-amber-300 hover:border-amber-400 hover:bg-amber-200 text-black'
                     }`}
                     onClick={() => toggleAnswer(index)}
                 >
@@ -813,7 +611,7 @@ const TextAnswerQuestionComponent: React.FC<{
                 type="text"
                 value={answer}
                 onChange={(e) => onAnswerChange(e.target.value)}
-                className="w-full p-4 border border-amber-300 rounded-md focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
+                className="w-full p-4 border border-amber-300 rounded-md focus:border-amber-500 focus:ring-1 focus:ring-amber-500 text-black text-lg"
                 placeholder="Введите ваш ответ..."
             />
             {!question.caseSensitive && (
@@ -850,7 +648,7 @@ const MatchingQuestionComponent: React.FC<{
                     </h4>
                     <div className="space-y-2">
                         {question.leftColumn.map((item) => (
-                            <div key={item.id} className="p-3 bg-amber-100 rounded border border-amber-200">
+                            <div key={item.id} className="p-3 bg-amber-100 rounded border border-amber-200 text-black">
                                 {item.id}. {item.text}
                             </div>
                         ))}
@@ -863,7 +661,7 @@ const MatchingQuestionComponent: React.FC<{
                     </h4>
                     <div className="space-y-2">
                         {question.rightColumn.map((item) => (
-                            <div key={item.id} className="p-3 bg-amber-100 rounded border border-amber-200">
+                            <div key={item.id} className="p-3 bg-amber-100 rounded border border-amber-200 text-black">
                                 {item.id}. {item.text}
                             </div>
                         ))}
@@ -882,7 +680,7 @@ const MatchingQuestionComponent: React.FC<{
                             onChange={(e) => handleMatchChange(leftItem.id, e.target.value)}
                             className="p-2 border border-amber-300 rounded"
                         >
-                            <option value="">Выберите...</option>
+                            <option value="">...</option>
                             {question.rightColumn.map((rightItem) => (
                                 <option key={rightItem.id} value={rightItem.id}>
                                     {rightItem.id}
@@ -898,6 +696,28 @@ const MatchingQuestionComponent: React.FC<{
             </div>
         </div>
     );
+};
+
+// Функция для проверки ответов (должна быть доступна в области видимости)
+const checkAnswer = (question: Question, userAnswer: any): boolean => {
+    switch (question.type) {
+        case 'single':
+            return userAnswer === (question as SingleChoiceQuestion).correctAnswer;
+        case 'multiple':
+            return JSON.stringify([...(userAnswer || [])].sort()) ===
+                JSON.stringify([...(question as MultipleChoiceQuestion).correctAnswers].sort());
+        case 'text':
+            const textQuestion = question as TextAnswerQuestion;
+            if (textQuestion.caseSensitive) {
+                return (userAnswer || '').trim() === textQuestion.correctAnswer;
+            }
+            return (userAnswer || '').trim().toLowerCase() === textQuestion.correctAnswer.toLowerCase();
+        case 'matching':
+            return JSON.stringify([...(userAnswer || [])].sort((a: any, b: any) => a.leftId - b.leftId)) ===
+                JSON.stringify([...(question as MatchingQuestion).correctMatches].sort((a: any, b: any) => a.leftId - b.leftId));
+        default:
+            return false;
+    }
 };
 
 const sections: Section[] = [
@@ -1259,26 +1079,6 @@ export default function Home() {
         }
     };
 
-    // Проверка правильности ответов
-    const checkAnswer = (question: Question, userAnswer: any): boolean => {
-        switch (question.type) {
-            case 'single':
-                return userAnswer === question.correctAnswer;
-            case 'multiple':
-                return JSON.stringify([...userAnswer].sort()) === JSON.stringify([...question.correctAnswers].sort());
-            case 'text':
-                if (question.caseSensitive) {
-                    return userAnswer.trim() === question.correctAnswer;
-                }
-                return userAnswer.trim().toLowerCase() === question.correctAnswer.toLowerCase();
-            case 'matching':
-                return JSON.stringify([...userAnswer].sort((a, b) => a.leftId - b.leftId)) ===
-                    JSON.stringify([...question.correctMatches].sort((a, b) => a.leftId - b.leftId));
-            default:
-                return false;
-        }
-    };
-
     const restartQuiz = () => {
         resetQuiz();
     };
@@ -1428,8 +1228,7 @@ export default function Home() {
                                     ? 'Отличный результат! Вы хорошо знаете этот исторический период.'
                                     : percentage >= 60
                                         ? 'Хороший результат! Рекомендуем повторить материал.'
-                                        : 'Стоит изучить материал более внимательно и попробовать еще раз.'
-                                }
+                                        : 'Стоит изучить материал более внимательно и попробовать еще раз.'}
                             </p>
 
                             <div className="space-y-3 mt-6">
@@ -1446,8 +1245,8 @@ export default function Home() {
                                                     <XCircle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
                                                 )}
                                                 <div className="flex-1">
-                                                    <p className="mb-2 font-medium text-amber-900">{question.question}</p>
-                                                    <p className="text-sm text-amber-700">
+                                                    <p className="mb-2 font-medium text-black">{question.question}</p>
+                                                    <p className="text-sm text-black">
                                                         Ваш ответ: {formatUserAnswer(question, userAnswer)}
                                                     </p>
                                                     {!isCorrect && (
@@ -1455,7 +1254,7 @@ export default function Home() {
                                                             Правильный ответ: {formatCorrectAnswer(question)}
                                                         </p>
                                                     )}
-                                                    <p className="text-sm text-amber-600 mt-2">
+                                                    <p className="text-sm text-black mt-2">
                                                         {question.explanation}
                                                     </p>
                                                 </div>
@@ -1464,36 +1263,23 @@ export default function Home() {
                                     );
                                 })}
                             </div>
-                            <div className="flex gap-3 justify-center pt-6">
-                                <button
-                                    onClick={restartQuiz}
-                                    className="px-4 py-2 border border-amber-300 text-amber-800 rounded-md hover:bg-amber-200 flex items-center transition-colors"
-                                >
-                                    <RotateCcw className="w-4 h-4 mr-2" />
-                                    Пройти еще раз
-                                </button>
-                                <button
-                                    onClick={() => generateTestPDF(
-                                        currentSection.title,
-                                        score,
-                                        questions.length,
-                                        percentage,
-                                        questions,
-                                        userAnswers
-                                    )}
-                                    className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center transition-colors"
-                                >
-                                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
-                                    Сохранить в PDF
-                                </button>
-                                <button
-                                    onClick={exitQuiz}
-                                    className="px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 transition-colors"
-                                >
-                                    Вернуться к разделу
-                                </button>
+                            <div className="flex flex-col sm:flex-row gap-3 justify-center pt-6">
+                                <div className="flex flex-col sm:flex-row gap-3">
+                                    <button
+                                        onClick={restartQuiz}
+                                        className="px-4 py-2 border border-amber-300 text-amber-800 rounded-md hover:bg-amber-200 flex items-center justify-center transition-colors"
+                                    >
+                                        <RotateCcw className="w-4 h-4 mr-2" />
+                                        Пройти еще раз
+                                    </button>
+
+                                    <button
+                                        onClick={exitQuiz}
+                                        className="px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 transition-colors"
+                                    >
+                                        Вернуться к разделу
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1594,22 +1380,11 @@ export default function Home() {
                     <div className="mb-6">
                         <button
                             onClick={goToSection}
-                            className="mb-2 flex items-center text-amber-800 hover:text-amber-900"
+                            className="mb-4 flex items-center text-amber-800 hover:text-amber-900"
                         >
                             <ArrowLeft className="w-4 h-4 mr-2" />
                             Назад к разделу "{currentSection.title}"
                         </button>
-                        <nav className="text-sm text-amber-700">
-                            <span onClick={goToHome} className="cursor-pointer hover:text-amber-900">
-                                Главная
-                            </span>
-                            {' > '}
-                            <span onClick={goToSection} className="cursor-pointer hover:text-amber-900">
-                                {currentSection.title}
-                            </span>
-                            {' > '}
-                            <span>{currentTopic.title}</span>
-                        </nav>
                     </div>
 
                     <article className="bg-amber-100 border border-amber-200 rounded-lg shadow-lg p-6">
@@ -1626,7 +1401,7 @@ export default function Home() {
                         <div className="prose prose-lg max-w-none">
                             <h1 className="text-3xl font-bold mb-4 text-amber-900">{currentTopic.title}</h1>
                             <div
-                                className="text-black-800 leading-relaxed p-6 rounded-lg border border-amber-200 relative overflow-hidden"
+                                className="text-black-800 leading-relaxed p-6 rounded-lg border border-amber-200 relative overflow-hidden text-lg"
                                 style={{
                                     background: `url('/images/back.jpg') center/cover no-repeat`,
                                     backgroundAttachment: 'fixed',
@@ -1672,7 +1447,7 @@ export default function Home() {
                         <BookOpen className="w-5 h-5 text-amber-700" />
                         {term.term}
                     </h3>
-                    <p className="text-amber-800">
+                    <p className="text-black text-lg leading-relaxed">
                         {term.definition}
                     </p>
                 </div>
@@ -1800,15 +1575,26 @@ export default function Home() {
     // Главная страница с разделами
     return (
         <div className="min-h-screen bg-amber-50">
-            <div className="container mx-auto px-4 py-8 max-w-6xl">
-                <div className="text-center mb-12">
-                    <h1 className="text-4xl font-bold mb-4 text-amber-900">Исторический портал</h1>
-                    <p className="text-amber-700 max-w-2xl mx-auto">
-                        Изучайте историю Кубани от древних цивилизаций до новейшего времени.
-                        Выберите интересующий вас период для погружения в исторические события и факты.
-                    </p>
-                </div>
+            {/* Полоса с надписью "История Кубани. Региональный компонент" */}
+            <div className="bg-amber-100 py-4 px-4 border-b border-amber-200">
+                <h1 className="text-2xl font-bold text-amber-900 text-left">
+                    История Кубани. Региональный компонент
+                </h1>
+            </div>
 
+            {/* Картинка растянутая до краёв без пространства сверху */}
+            <div className="w-full">
+                <Image
+                    src="/images/main.jpg"
+                    alt="История Кубани"
+                    width={1200}
+                    height={400}
+                    className="w-full h-auto object-cover"
+                    priority
+                />
+            </div>
+
+            <div className="container mx-auto px-4 py-8 max-w-6xl">
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
                     {sections.map((section) => {
                         return (
@@ -1820,7 +1606,6 @@ export default function Home() {
                                 <div className="mb-4">
                                     <div className="flex items-center gap-4">
                                         <div className="p-3 bg-amber-200 rounded-lg">
-                                            {/* ✅ ИЗМЕНЕНО: Используем Image компонент */}
                                             <Image
                                                 src={section.icon}
                                                 alt={`${section.title} icon`}
