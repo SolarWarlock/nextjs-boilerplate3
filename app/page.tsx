@@ -891,11 +891,12 @@ export default function Home() {
                             </Link>
                         </div>
                     )}
+
                 </div>
             </div>
 
             <div className="w-full">
-                <Image src="/images/main.jpg" alt="История Кубани" width={1200} height={400} className="w-full h-auto object-cover" priority/>
+                <Image src="/images/Rubo_Kazaki1.jpg" alt="История Кубани" width={1200} height={400} className="w-full h-auto object-cover" priority/>
             </div>
 
             <div className="container mx-auto px-4 py-8 max-w-6xl">
