@@ -867,15 +867,29 @@ export default function Home() {
         <div className="min-h-screen bg-amber-50">
             <div className="bg-amber-100 py-4 px-4 border-b border-amber-200">
                 <div className="container mx-auto flex justify-between items-center">
-                    <h1 className="text-2xl font-bold text-amber-900 text-left">
-                        История Кубани. Региональный компонент
-                    </h1>
+                    <Image
+                        src="/images/kuban-history.png"
+                        alt="История Кубани"
+                        width={200} // Настройте под размер вашего логотипа
+                        height={50} // Настройте под размер вашего логотипа
+                        className="h-10 w-auto md:h-12" // Адаптивная высота
+                        priority
+                    />
                     {/* ✅ ИЗМЕНЕНИЕ: Кнопка "Скачать" показывается только если isTwa === false */}
                     {isTwa === false && (
                         <Link href="/download" className="hidden sm:flex items-center px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 transition-colors">
                             <QrCode className="w-5 h-5 mr-2" />
                             Скачать приложение
                         </Link>
+                    )}
+                    {/* ✅ ИЗМЕНЕНИЕ: Кнопка для мобильных устройств, показывается только если isTwa === false */}
+                    {isTwa === false && (
+                        <div className="sm:hidden mb-6">
+                            <Link href="/download" className="flex items-center justify-center w-full px-4 py-3 bg-amber-600 text-white rounded-md hover:bg-amber-700 transition-colors">
+                                <QrCode className="w-5 h-5 mr-2" />
+                                Скачать приложение
+                            </Link>
+                        </div>
                     )}
                 </div>
             </div>
@@ -885,15 +899,7 @@ export default function Home() {
             </div>
 
             <div className="container mx-auto px-4 py-8 max-w-6xl">
-                {/* ✅ ИЗМЕНЕНИЕ: Кнопка для мобильных устройств, показывается только если isTwa === false */}
-                {isTwa === false && (
-                    <div className="sm:hidden mb-6">
-                        <Link href="/download" className="flex items-center justify-center w-full px-4 py-3 bg-amber-600 text-white rounded-md hover:bg-amber-700 transition-colors">
-                            <QrCode className="w-5 h-5 mr-2" />
-                            Скачать приложение
-                        </Link>
-                    </div>
-                )}
+
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
                     {sections.map((section) => (
                         <div key={section.id} className="cursor-pointer border border-amber-200 rounded-lg p-6 hover:shadow-lg transition-all duration-200 bg-amber-100 hover:bg-amber-200" onClick={() => setCurrentSection(section)}>
