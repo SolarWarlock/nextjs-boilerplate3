@@ -1610,16 +1610,21 @@ export default function Home() {
     return (
         <div className="min-h-screen bg-amber-50">
             {/* Полоса с надписью "История Кубани. Региональный компонент" */}
-            <div className="bg-amber-100 py-4 px-4 border-b border-amber-200">
-                <h1 className="text-2xl font-bold text-amber-900 text-left">
-                    История Кубани. Региональный компонент
-                </h1>
-            </div>
+        <div className="ml-8">
+            <Image
+                src="/images/kuban-history.png"
+                alt="История Кубани"
+                width={200} // Настройте под размер вашего логотипа
+                height={50} // Настройте под размер вашего логотипа
+                className="h-10 w-auto md:h-12" // Адаптивная высота
+                priority
+            />
+        </div>
 
             {/* Картинка растянутая до краёв без пространства сверху */}
             <div className="w-full">
                 <Image
-                    src="/images/main.jpg"
+                    src="/images/Rubo_Kazaki1.jpg"
                     alt="История Кубани"
                     width={1200}
                     height={400}
