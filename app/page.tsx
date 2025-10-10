@@ -3,6 +3,12 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 
+const ArrowRight = ({ className }: { className?: string }) => (
+    <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="m12 19 7-7-7-7" />
+        <path d="M5 12h14" />
+    </svg>
+);
 // Custom SVG icon components
 const ArrowLeft = ({ className }: { className?: string }) => (
     <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -552,7 +558,7 @@ const SingleChoiceQuestionComponent: React.FC<{
                     className={`w-full text-left p-4 rounded-md border transition-all ${selectedAnswer === index
                         ? 'border-amber-600 bg-amber-200 text-black'
                         : 'border-amber-300 hover:border-amber-400 hover:bg-amber-200 text-black'
-                    }`}
+                        }`}
                     onClick={() => onAnswerSelect(index)}
                 >
                     <span className="font-semibold mr-3">
@@ -586,7 +592,7 @@ const MultipleChoiceQuestionComponent: React.FC<{
                     className={`w-full text-left p-4 rounded-md border transition-all ${selectedAnswers.includes(index)
                         ? 'border-amber-600 bg-amber-200 text-black'
                         : 'border-amber-300 hover:border-amber-400 hover:bg-amber-200 text-black'
-                    }`}
+                        }`}
                     onClick={() => toggleAnswer(index)}
                 >
                     <span className="font-semibold mr-3">
@@ -1039,7 +1045,7 @@ export default function Home() {
     const resetQuiz = () => {
         setCurrentQuestion(0);
         setUserAnswers([]);
-        setSelectedAnswer(null);
+        setSelectedAnswer(getInitialAnswerState(quiz?.questions[0] || null));
         setShowResult(false);
         setQuizCompleted(false);
     };
@@ -1051,20 +1057,34 @@ export default function Home() {
     // Адаптированная функция для работы с загружаемым квизом
     const nextQuestion = (quiz: Quiz | null) => {
         if (selectedAnswer !== null && selectedAnswer !== undefined && selectedAnswer !== '' && quiz) {
-            const newAnswers = [...userAnswers, selectedAnswer];
+            const newAnswers = [...userAnswers];
+            newAnswers[currentQuestion] = selectedAnswer; // Сохраняем ответ для текущего вопроса
             setUserAnswers(newAnswers);
 
             if (currentQuestion < quiz.questions.length - 1) {
                 setCurrentQuestion(currentQuestion + 1);
-                setSelectedAnswer(getInitialAnswerState(quiz.questions[currentQuestion + 1]));
+                setSelectedAnswer(newAnswers[currentQuestion + 1] || getInitialAnswerState(quiz.questions[currentQuestion + 1]));
             } else {
                 setQuizCompleted(true);
                 setShowResult(true);
             }
         }
     };
+    const prevQuestion = (quiz: Quiz | null) => {
+        if (currentQuestion > 0 && quiz) {
+            // Сохраняем текущий ответ перед переходом
+            const newAnswers = [...userAnswers];
+            newAnswers[currentQuestion] = selectedAnswer;
+            setUserAnswers(newAnswers);
+
+            setCurrentQuestion(currentQuestion - 1);
+            setSelectedAnswer(newAnswers[currentQuestion - 1] || getInitialAnswerState(quiz.questions[currentQuestion - 1]));
+        }
+    };
     // Функция для получения начального состояния ответа в зависимости от типа вопроса
-    const getInitialAnswerState = (question: Question) => {
+    const getInitialAnswerState = (question: Question | null) => {
+        if (!question) return null;
+
         switch (question.type) {
             case 'single':
                 return null;
@@ -1217,7 +1237,7 @@ export default function Home() {
                                     <span className={`px-2 py-1 rounded-full text-sm ${percentage >= 80 ? 'bg-green-200 text-green-800' :
                                         percentage >= 60 ? 'bg-yellow-200 text-yellow-800' :
                                             'bg-red-200 text-red-800'
-                                    }`}>
+                                        }`}>
                                         {percentage}%
                                     </span>
                                 </div>
@@ -1305,7 +1325,7 @@ export default function Home() {
                             <div className="flex items-center justify-between">
                                 <h2 className="text-xl font-semibold text-amber-900">Тест: {currentSection.title}</h2>
                                 <span className="px-2 py-1 bg-amber-200 text-amber-800 rounded-md text-sm">
-                                    {currentQuestion + 1} из {questions.length}
+                                    Вопрос {currentQuestion + 1} из {questions.length}
                                 </span>
                             </div>
                             <div className="w-full bg-amber-200 rounded-full h-2">
@@ -1353,16 +1373,29 @@ export default function Home() {
                             />
                         )}
 
-                        <div className="flex justify-end pt-6">
+                        <div className="flex justify-between pt-6">
+                            <button
+                                onClick={() => prevQuestion(quiz)}
+                                disabled={currentQuestion === 0}
+                                className={`px-6 py-2 rounded-md transition-colors flex items-center gap-2 ${currentQuestion === 0
+                                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                        : 'bg-amber-500 text-white hover:bg-amber-600'
+                                    }`}
+                            >
+                                <ArrowLeft className="w-4 h-4" />
+                                Назад
+                            </button>
+
                             <button
                                 onClick={() => nextQuestion(quiz)}
                                 disabled={!isAnswerReady()}
-                                className={`px-6 py-2 rounded-md transition-colors ${!isAnswerReady()
-                                    ? 'bg-amber-300 text-amber-500 cursor-not-allowed'
-                                    : 'bg-amber-600 text-white hover:bg-amber-700'
-                                }`}
+                                className={`px-6 py-2 rounded-md transition-colors flex items-center gap-2 ${!isAnswerReady()
+                                        ? 'bg-amber-300 text-amber-500 cursor-not-allowed'
+                                        : 'bg-amber-600 text-white hover:bg-amber-700'
+                                    }`}
                             >
-                                {currentQuestion === questions.length - 1 ? 'Завершить тест' : 'Следующий вопрос'}
+                                {currentQuestion === questions.length - 1 ? 'Завершить тест' : 'Далее'}
+                                {currentQuestion < questions.length - 1 && <ArrowRight className="w-4 h-4" />}
                             </button>
                         </div>
                     </div>
@@ -1625,7 +1658,7 @@ export default function Home() {
                                     <div className="flex items-center justify-between text-sm text-amber-700">
                                         <span>
                                             {section.topics.length} {section.topics.length === 1 ? 'тема' :
-                                            section.topics.length < 5 ? 'темы' : 'тем'}
+                                                section.topics.length < 5 ? 'темы' : 'тем'}
                                         </span>
                                     </div>
                                 </div>
