@@ -893,7 +893,7 @@ export default function Home() {
 
         // Если это ПК браузер -> ссылка на страницу с QR-кодом
         return (
-            <Link href="/download" className="flex items-center px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 transition-colors">
+            <Link href="/download" className="flex items-center px-4 py-2 bg-amber-600 text-sm text-white rounded-md hover:bg-amber-700 transition-colors">
                 <QrCode className="w-5 h-5 mr-2" />
                 Скачать приложение
             </Link>
