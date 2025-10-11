@@ -907,22 +907,28 @@ export default function Home() {
                     <Image
                         src="/images/kuban-history.png"
                         alt="История Кубани"
-                        width={200} // Настройте под размер вашего логотипа
-                        height={50} // Настройте под размер вашего логотипа
-                        className="h-10 w-auto md:h-12" // Адаптивная высота
+                        width={200}
+                        height={50}
+                        className="h-10 w-auto md:h-12" // Логотип высотой 40px (h-10) на мобильных и 48px (h-12) на десктопе
                         priority
                     />
                     {/* Кнопка "Скачать" показывается только если isTwa === false */}
                     {isTwa === false && (
-                        <Link href="/download" className="hidden sm:flex items-center px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 transition-colors">
+                        <Link
+                            href="/download"
+                            className="hidden sm:flex items-center px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 transition-colors h-10 md:h-12" // Добавлены фиксированные высоты
+                        >
                             <QrCode className="w-5 h-5 mr-2" />
                             Скачать приложение
                         </Link>
                     )}
                     {/* Кнопка для мобильных устройств, показывается только если isTwa === false */}
                     {isTwa === false && (
-                        <div className="sm:hidden mb-6">
-                            <Link href="/download" className="flex items-center justify-center w-full px-4 py-3 bg-amber-600 text-white rounded-md hover:bg-amber-700 transition-colors">
+                        <div className="sm:hidden">
+                            <Link
+                                href="/download"
+                                className="flex items-center justify-center px-4 py-2 bg-amber-600 text-sm text-white rounded-lg hover:bg-amber-700 transition-colors h-10" // Добавлена фиксированная высота
+                            >
                                 <QrCode className="w-5 h-5 mr-2" />
                                 Скачать приложение
                             </Link>
