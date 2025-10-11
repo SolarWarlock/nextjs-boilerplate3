@@ -883,7 +883,7 @@ export default function Home() {
                 <a
                     href="/KubanHistory.apk" // ✅ Прямой путь к вашему файлу в /public
                     download  // Этот атрибут указывает браузеру скачать файл
-                    className="flex items-center px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 transition-colors"
+                    className="flex items-center px-3 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 transition-colors"
                 >
                     <QrCode className="w-5 h-5 mr-2" />
                     Скачать приложение
