@@ -893,7 +893,7 @@ export default function Home() {
 
         // Если это ПК браузер -> ссылка на страницу с QR-кодом
         return (
-            <Link href="/download" className="flex items-center px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 transition-colors">
+            <Link href="/download" className="flex items-center px-4 py-2 bg-amber-600 text-sm text-white rounded-md hover:bg-amber-700 transition-colors">
                 <QrCode className="w-5 h-5 mr-2" />
                 Скачать приложение
             </Link>
@@ -913,7 +913,11 @@ export default function Home() {
                         priority
                     />
                     {/* Используем компонент DownloadButton для десктопа */}
-                    <div className="hidden sm:flex">
+                    <div className="hidden sm:flex items-center">
+                        <DownloadButton />
+                    </div>
+                    {/*Используем компонент DownloadButton для мобильных */}
+                    <div className="sm:hidden flex items-center">
                         <DownloadButton />
                     </div>
                 </div>
@@ -925,10 +929,7 @@ export default function Home() {
 
             <div className="container mx-auto px-4 py-8 max-w-6xl">
 
-                {/*Используем компонент DownloadButton для мобильных */}
-                <div className="sm:hidden mb-6">
-                    <DownloadButton />
-                </div>
+
 
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
                     {sections.map((section) => (
