@@ -545,15 +545,23 @@ const sections: Section[] = [
 ];
 
 export default function Home() {
-    // ✅ НОВЫЙ КОД: Состояние для определения, запущено ли приложение как TWA (в оболочке)
+    // Состояние для определения, запущено ли приложение как TWA (в оболочке)
     // Изначально null, чтобы кнопка не "моргала" при загрузке
     const [isTwa, setIsTwa] = useState<boolean | null>(null);
 
-    // ✅ НОВЫЙ КОД: Этот эффект выполняется один раз при загрузке страницы на клиенте
+    // Состояние для определения типа устройства (ПК или мобильный)
+    const [isMobile, setIsMobile] = useState<boolean | null>(null);
+
+    // Этот эффект выполняется один раз при загрузке страницы на клиенте
     useEffect(() => {
         // Проверяем, соответствует ли режим отображения 'standalone' (как у TWA)
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
         setIsTwa(isStandalone);
+
+        // Проверяем тип устройства по User Agent
+        const userAgent = typeof window.navigator === "undefined" ? "" : navigator.userAgent;
+        const mobile = Boolean(userAgent.match(/Android|BlackBerry|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i));
+        setIsMobile(mobile);
     }, []); // Пустой массив зависимостей означает, что эффект запустится только один раз
 
     const [currentSection, setCurrentSection] = useState<Section | null>(null);
@@ -663,8 +671,8 @@ export default function Home() {
     };
 
 
-    // --- Вся ваша логика отображения (без изменений) ---
-    // ... (if (currentSection && isQuizMode) { ... } и т.д.)
+    // --- Вся ваша логика отображения  ---
+    //
     if (currentSection && isQuizMode) {
         if (quizLoading) {
             return <div className="min-h-screen bg-amber-50 flex justify-center items-center"><div className="text-amber-700">Загрузка теста...</div></div>;
@@ -863,6 +871,35 @@ export default function Home() {
     }
 
     // --- Главная страница с разделами ---
+    const DownloadButton = () => {
+        // Не рендерим кнопку, пока не определили окружение
+        if (isTwa === null || isTwa === true) {
+            return null;
+        }
+
+        // Если это мобильный браузер -> прямая ссылка на скачивание
+        if (isMobile) {
+            return (
+                <a
+                    href="/KubanHistory.apk" // ✅ Прямой путь к вашему файлу в /public
+                    download = "https://github.com/SolarWarlock/nextjs-boilerplate3/raw/main/public/KubanHistory.apk" // Этот атрибут указывает браузеру скачать файл
+                    className="flex items-center px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 transition-colors"
+                >
+                    <QrCode className="w-5 h-5 mr-2" />
+                    Скачать приложение
+                </a>
+            );
+        }
+
+        // Если это ПК браузер -> ссылка на страницу с QR-кодом
+        return (
+            <Link href="/download" className="flex items-center px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 transition-colors">
+                <QrCode className="w-5 h-5 mr-2" />
+                Скачать приложение
+            </Link>
+        );
+    };
+
     return (
         <div className="min-h-screen bg-amber-50">
             <div className="bg-amber-100 py-4 px-4 border-b border-amber-200">
@@ -875,14 +912,14 @@ export default function Home() {
                         className="h-10 w-auto md:h-12" // Адаптивная высота
                         priority
                     />
-                    {/* ✅ ИЗМЕНЕНИЕ: Кнопка "Скачать" показывается только если isTwa === false */}
+                    {/* Кнопка "Скачать" показывается только если isTwa === false */}
                     {isTwa === false && (
                         <Link href="/download" className="hidden sm:flex items-center px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 transition-colors">
                             <QrCode className="w-5 h-5 mr-2" />
                             Скачать приложение
                         </Link>
                     )}
-                    {/* ✅ ИЗМЕНЕНИЕ: Кнопка для мобильных устройств, показывается только если isTwa === false */}
+                    {/* Кнопка для мобильных устройств, показывается только если isTwa === false */}
                     {isTwa === false && (
                         <div className="sm:hidden mb-6">
                             <Link href="/download" className="flex items-center justify-center w-full px-4 py-3 bg-amber-600 text-white rounded-md hover:bg-amber-700 transition-colors">
@@ -891,11 +928,12 @@ export default function Home() {
                             </Link>
                         </div>
                     )}
+
                 </div>
             </div>
 
             <div className="w-full">
-                <Image src="/images/main.jpg" alt="История Кубани" width={1200} height={400} className="w-full h-auto object-cover" priority/>
+                <Image src="/images/Rubo_Kazaki1.jpg" alt="История Кубани" width={1200} height={400} className="w-full h-auto object-cover" priority/>
             </div>
 
             <div className="container mx-auto px-4 py-8 max-w-6xl">
