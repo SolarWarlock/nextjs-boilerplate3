@@ -882,7 +882,7 @@ export default function Home() {
             return (
                 <a
                     href="/KubanHistory.apk" // ✅ Прямой путь к вашему файлу в /public
-                    download = "https://raw.githubusercontent.com/SolarWarlock/nextjs-boilerplate3/main/public/KubanHistory.apk" // Этот атрибут указывает браузеру скачать файл
+                    download  // Этот атрибут указывает браузеру скачать файл
                     className="flex items-center px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 transition-colors"
                 >
                     <QrCode className="w-5 h-5 mr-2" />
@@ -912,29 +912,10 @@ export default function Home() {
                         className="h-10 w-auto md:h-12" // Логотип высотой 40px (h-10) на мобильных и 48px (h-12) на десктопе
                         priority
                     />
-                    {/* Кнопка "Скачать" показывается только если isTwa === false */}
-                    {isTwa === false && (
-                        <Link
-                            href="/download"
-                            className="hidden sm:flex items-center px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 transition-colors h-10 md:h-12" // Добавлены фиксированные высоты
-                        >
-                            <QrCode className="w-5 h-5 mr-2" />
-                            Скачать приложение
-                        </Link>
-                    )}
-                    {/* Кнопка для мобильных устройств, показывается только если isTwa === false */}
-                    {isTwa === false && (
-                        <div className="sm:hidden">
-                            <Link
-                                href="/download"
-                                className="flex items-center justify-center px-4 py-2 bg-amber-600 text-sm text-white rounded-lg hover:bg-amber-700 transition-colors h-10" // Добавлена фиксированная высота
-                            >
-                                <QrCode className="w-5 h-5 mr-2" />
-                                Скачать приложение
-                            </Link>
-                        </div>
-                    )}
-
+                    {/* Используем компонент DownloadButton для десктопа */}
+                    <div className="hidden sm:flex">
+                        <DownloadButton />
+                    </div>
                 </div>
             </div>
 
@@ -943,6 +924,11 @@ export default function Home() {
             </div>
 
             <div className="container mx-auto px-4 py-8 max-w-6xl">
+
+                {/*Используем компонент DownloadButton для мобильных */}
+                <div className="sm:hidden mb-6">
+                    <DownloadButton />
+                </div>
 
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
                     {sections.map((section) => (
