@@ -904,16 +904,24 @@ export default function Home() {
         <div className="min-h-screen bg-amber-50">
             <div className="bg-amber-100 py-4 px-4 border-b border-amber-200">
                 <div className="container mx-auto flex justify-between items-center">
-                    <Image
-                        src="/images/kuban-history.png"
-                        alt="История Кубани"
-                        width={200}
-                        height={50}
-                        className="h-10 w-auto md:h-12" // Логотип высотой 40px (h-10) на мобильных и 48px (h-12) на десктопе
-                        priority
-                    />
+                    <div className="flex items-center">
+                        <Image
+                            src="/images/kuban-history.png"
+                            alt="История Кубани"
+                            width={200}
+                            height={50}
+                            className="h-10 w-auto md:h-12" // Логотип высотой 40px (h-10) на мобильных и 48px (h-12) на десктопе
+                            priority
+                        />
+                    </div>
+
                     {/* Используем компонент DownloadButton для десктопа */}
-                    <div className="hidden sm:flex">
+                    <div className="hidden sm:flex items-center">
+                        <DownloadButton />
+                    </div>
+
+                    {/* Используем компонент DownloadButton для мобильных */}
+                    <div className="sm:hidden flex items-center">
                         <DownloadButton />
                     </div>
                 </div>
@@ -925,10 +933,7 @@ export default function Home() {
 
             <div className="container mx-auto px-4 py-8 max-w-6xl">
 
-                {/*Используем компонент DownloadButton для мобильных */}
-                <div className="sm:hidden mb-6">
-                    <DownloadButton />
-                </div>
+
 
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
                     {sections.map((section) => (
