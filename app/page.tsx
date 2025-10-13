@@ -584,6 +584,73 @@ export default function Home() {
         currentSection && isGlossaryMode ? currentSection.glossaryFile : null
     );
 
+
+    // Обработчик кнопки "назад" для TWA
+    useEffect(() => {
+        const handleBackButton = (event: Event) => {
+            // Предотвращаем стандартное поведение (выход из приложения)
+            event.preventDefault();
+
+            // Обрабатываем навигацию в зависимости от текущего состояния
+            if (isQuizMode && currentSection) {
+                if (showResult) {
+                    // В режиме результатов теста - выходим из теста
+                    exitQuiz();
+                } else if (currentQuestion > 0) {
+                    // В режиме теста - переходим к предыдущему вопросу
+                    prevQuestion(quiz);
+                } else {
+                    // На первом вопросе - выходим из теста
+                    exitQuiz();
+                }
+            } else if (isGlossaryMode && currentSection) {
+                // В режиме глоссария - выходим из глоссария
+                exitGlossary();
+            } else if (currentTopic && currentSection) {
+                // В теме - возвращаемся к списку тем
+                goToSection();
+            } else if (currentSection) {
+                // В списке тем - возвращаемся к разделам
+                goToHome();
+            } else {
+                // На главной странице - стандартное поведение (выход)
+                // Для TWA приложения можно использовать window.close()
+                if (isTwa) {
+                    // В TWA приложении показываем подтверждение выхода
+                    if (window.confirm('Вы уверены, что хотите выйти из приложения?')) {
+                        // Закрываем приложение
+                        if (window.close) {
+                            window.close();
+                        } else {
+                            // Fallback для браузеров, которые не поддерживают window.close()
+                            window.history.back();
+                        }
+                    }
+                } else {
+                    // В обычном браузере - стандартное поведение
+                    window.history.back();
+                }
+            }
+        };
+
+        // Добавляем обработчик события backbutton (для Cordova/Capacitor)
+        document.addEventListener('backbutton', handleBackButton, false);
+
+        // Также обрабатываем событие popstate (нажатие кнопки назад в браузере)
+        const handlePopState = (event: PopStateEvent) => {
+            event.preventDefault();
+            handleBackButton(new Event('backbutton'));
+        };
+
+        window.addEventListener('popstate', handlePopState);
+
+        // Очистка при размонтировании компонента
+        return () => {
+            document.removeEventListener('backbutton', handleBackButton, false);
+            window.removeEventListener('popstate', handlePopState);
+        };
+    }, [currentSection, currentTopic, isQuizMode, isGlossaryMode, currentQuestion, showResult, quiz, isTwa]);
+
     // --- Ваши существующие функции навигации (без изменений) ---
     // ... (goToHome, startQuiz, resetQuiz и т.д.)
     const goToHome = () => {
