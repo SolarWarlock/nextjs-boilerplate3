@@ -590,12 +590,17 @@ export default function Home() {
 
     // Эффект для обработки кнопки "назад" в TWA
     useEffect(() => {
-        const handlePopState = (event: PopStateEvent) => {
-            event.preventDefault();
-            handleBackNavigation();
-        };
-
         const handleBackNavigation = () => {
+            console.log('Back navigation triggered. State:', {
+                currentSection: !!currentSection,
+                currentTopic: !!currentTopic,
+                isQuizMode,
+                isGlossaryMode,
+                currentQuestion,
+                showResult,
+                isTwa
+            });
+
             if (isQuizMode && currentSection) {
                 if (showResult) {
                     exitQuiz();
@@ -604,55 +609,95 @@ export default function Home() {
                 } else {
                     exitQuiz();
                 }
+                return true;
             } else if (isGlossaryMode && currentSection) {
                 exitGlossary();
+                return true;
             } else if (currentTopic && currentSection) {
                 goToSection();
+                return true;
             } else if (currentSection) {
                 goToHome();
+                return true;
             } else {
-                // На главной странице - добавляем состояние в историю
+                // На главной странице
                 if (isTwa) {
-                    window.history.pushState(null, '', window.location.href);
+                    // Для TWA приложения
                     if (window.confirm('Вы уверены, что хотите выйти из приложения?')) {
-                        window.close();
+                        // Пробуем разные методы закрытия
+                        if (typeof window.close !== 'undefined') {
+                            window.close();
+                        } else if (window.history.length > 1) {
+                            window.history.back();
+                        } else {
+                            // Последний вариант - редирект на пустую страницу
+                            window.location.href = 'about:blank';
+                        }
                     }
+                    return true;
+                } else {
+                    // Для браузера - стандартное поведение
+                    return false;
                 }
             }
         };
 
-        // Добавляем состояние в историю при загрузке
-        if (isTwa) {
-            window.history.pushState(null, '', window.location.href);
-        }
+        const handlePopState = (event: PopStateEvent) => {
+            console.log('Popstate event');
+            event.preventDefault();
 
-        // Обработчик popstate (когда пользователь нажимает назад)
-        window.addEventListener('popstate', handlePopState);
+            const handled = handleBackNavigation();
+            if (handled) {
+                // Если обработали навигацию, добавляем новое состояние
+                window.history.pushState({ handled: true }, '');
+            }
+        };
 
-        // Обработчик backbutton для Cordova/TWA
         const handleBackButton = (event: Event) => {
+            console.log('Backbutton event');
             event.preventDefault();
             handleBackNavigation();
         };
 
+        // Универсальный обработчик для всех случаев
+        const handleUniversalBack = (event: Event) => {
+            event.preventDefault();
+            const handled = handleBackNavigation();
+
+            // Если не обработали (браузер на главной), позволяем стандартное поведение
+            if (!handled && !isTwa) {
+                window.history.back();
+            }
+        };
+
+        // Добавляем начальное состояние в историю для TWA
+        if (isTwa) {
+            window.history.pushState({ initial: true }, '');
+        }
+
+        // Добавляем обработчики
+        window.addEventListener('popstate', handlePopState);
+
+        // Для TWA приложения
         if (isTwa) {
             document.addEventListener('backbutton', handleBackButton, false);
-            // Также пробуем добавить обработчик для beforeunload
-            window.addEventListener('beforeunload', (event) => {
-                if (currentSection || currentTopic || isQuizMode || isGlossaryMode) {
-                    event.preventDefault();
-                    event.returnValue = '';
-                    handleBackNavigation();
-                }
-            });
         }
+
+        // Универсальный обработчик для браузеров
+        window.addEventListener('beforeunload', (event) => {
+            // Предотвращаем закрытие только если есть активная навигация
+            if (currentSection || currentTopic || isQuizMode || isGlossaryMode) {
+                event.preventDefault();
+                event.returnValue = '';
+            }
+        });
 
         return () => {
             window.removeEventListener('popstate', handlePopState);
             if (isTwa) {
                 document.removeEventListener('backbutton', handleBackButton, false);
-                window.removeEventListener('beforeunload', (event) => { });
             }
+            window.removeEventListener('beforeunload', (event) => { });
         };
     }, [currentSection, currentTopic, isQuizMode, isGlossaryMode, currentQuestion, showResult, quiz, isTwa]);
 
