@@ -584,6 +584,64 @@ export default function Home() {
         currentSection && isGlossaryMode ? currentSection.glossaryFile : null
     );
 
+    // Универсальный обработчик кнопки "назад"
+    useEffect(() => {
+        const handleBackButton = () => {
+            if (isQuizMode && currentSection) {
+                if (showResult) {
+                    exitQuiz();
+                } else if (currentQuestion > 0) {
+                    prevQuestion(quiz);
+                } else {
+                    exitQuiz();
+                }
+                return true; // Предотвращаем выход
+            } else if (isGlossaryMode && currentSection) {
+                exitGlossary();
+                return true;
+            } else if (currentTopic && currentSection) {
+                goToSection();
+                return true;
+            } else if (currentSection) {
+                goToHome();
+                return true;
+            }
+            return false; // Разрешаем выход
+        };
+
+        // Обработчик для Cordova/PhoneGap
+        if ((window as any).cordova) {
+            document.addEventListener('backbutton', (e) => {
+                if (!handleBackButton()) {
+                    // Если функция вернула false, показываем подтверждение выхода
+                    if (window.confirm('Вы уверены, что хотите выйти из приложения?')) {
+                        (window as any).navigator.app.exitApp();
+                    }
+                }
+            }, false);
+        }
+
+        // Обработчик для обычного браузера (для тестирования)
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                if (!handleBackButton()) {
+                    if (window.confirm('Вы уверены, что хотите выйти из приложения?')) {
+                        window.close();
+                    }
+                }
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+            if ((window as any).cordova) {
+                document.removeEventListener('backbutton', handleBackButton as any);
+            }
+        };
+    }, [currentSection, currentTopic, isQuizMode, isGlossaryMode, currentQuestion, showResult, quiz]);
+
     // --- Ваши существующие функции навигации (без изменений) ---
     // ... (goToHome, startQuiz, resetQuiz и т.д.)
     const goToHome = () => {
