@@ -584,61 +584,49 @@ export default function Home() {
         currentSection && isGlossaryMode ? currentSection.glossaryFile : null
     );
 
-    // Универсальный обработчик кнопки "назад"
     useEffect(() => {
-        const handleBackButton = () => {
+        const handleBackButton = (event: Event) => {
+            // Предотвращаем стандартное поведение (выход из приложения)
+            event.preventDefault();
+
+            // Обрабатываем навигацию в зависимости от текущего состояния
             if (isQuizMode && currentSection) {
                 if (showResult) {
+                    // В режиме результатов теста - выходим из теста
                     exitQuiz();
                 } else if (currentQuestion > 0) {
+                    // В режиме теста - переходим к предыдущему вопросу
                     prevQuestion(quiz);
                 } else {
+                    // На первом вопросе - выходим из теста
                     exitQuiz();
                 }
-                return true; // Предотвращаем выход
             } else if (isGlossaryMode && currentSection) {
+                // В режиме глоссария - выходим из глоссария
                 exitGlossary();
-                return true;
             } else if (currentTopic && currentSection) {
+                // В теме - возвращаемся к списку тем
                 goToSection();
-                return true;
             } else if (currentSection) {
+                // В списке тем - возвращаемся к разделам
                 goToHome();
-                return true;
-            }
-            return false; // Разрешаем выход
-        };
-
-        // Обработчик для Cordova/PhoneGap
-        if ((window as any).cordova) {
-            document.addEventListener('backbutton', (e) => {
-                if (!handleBackButton()) {
-                    // Если функция вернула false, показываем подтверждение выхода
-                    if (window.confirm('Вы уверены, что хотите выйти из приложения?')) {
-                        (window as any).navigator.app.exitApp();
-                    }
-                }
-            }, false);
-        }
-
-        // Обработчик для обычного браузера (для тестирования)
-        const handleKeyDown = (event: KeyboardEvent) => {
-            if (event.key === 'Escape') {
-                if (!handleBackButton()) {
-                    if (window.confirm('Вы уверены, что хотите выйти из приложения?')) {
-                        window.close();
-                    }
+            } else {
+                // На главной странице - стандартное поведение (выход)
+                // Можно показать подтверждение выхода
+                if (window.confirm('Вы уверены, что хотите выйти из приложения?')) {
+                    // Для TWA приложения можно использовать window.close()
+                    // или оставить стандартное поведение
+                    window.history.back();
                 }
             }
         };
 
-        window.addEventListener('keydown', handleKeyDown);
+        // Добавляем обработчик события
+        document.addEventListener('backbutton', handleBackButton, false);
 
+        // Очистка при размонтировании компонента
         return () => {
-            window.removeEventListener('keydown', handleKeyDown);
-            if ((window as any).cordova) {
-                document.removeEventListener('backbutton', handleBackButton as any);
-            }
+            document.removeEventListener('backbutton', handleBackButton, false);
         };
     }, [currentSection, currentTopic, isQuizMode, isGlossaryMode, currentQuestion, showResult, quiz]);
 
