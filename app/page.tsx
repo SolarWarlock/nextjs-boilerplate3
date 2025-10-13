@@ -577,6 +577,9 @@ export default function Home() {
         // Сбрасываем прокрутку в начало страницы при любом изменении навигации
         window.scrollTo(0, 0);
     }, [currentSection, currentTopic, isQuizMode, isGlossaryMode, currentQuestion, showResult]);
+
+
+
     const { quiz, loading: quizLoading, error: quizError } = useQuiz(
         currentSection && isQuizMode ? currentSection.quizFile : null
     );
@@ -584,6 +587,8 @@ export default function Home() {
         currentSection && isGlossaryMode ? currentSection.glossaryFile : null
     );
 
+
+    // Эффект для обработки кнопки "назад" в TWA
     useEffect(() => {
         const handleBackButton = (event: Event) => {
             // Предотвращаем стандартное поведение (выход из приложения)
@@ -616,19 +621,35 @@ export default function Home() {
                 if (window.confirm('Вы уверены, что хотите выйти из приложения?')) {
                     // Для TWA приложения можно использовать window.close()
                     // или оставить стандартное поведение
-                    window.history.back();
+                    if (isTwa) {
+                        window.close();
+                    } else {
+                        window.history.back();
+                    }
                 }
             }
         };
 
-        // Добавляем обработчик события
-        document.addEventListener('backbutton', handleBackButton, false);
+        // Добавляем обработчик события backbutton (для Cordova/Capacitor/TWA)
+        if (isTwa) {
+            document.addEventListener('backbutton', handleBackButton, false);
+        }
+
+        // Также обрабатываем нажатие клавиши Escape для тестирования в браузере
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                handleBackButton(event);
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown, false);
 
         // Очистка при размонтировании компонента
         return () => {
             document.removeEventListener('backbutton', handleBackButton, false);
+            document.removeEventListener('keydown', handleKeyDown, false);
         };
-    }, [currentSection, currentTopic, isQuizMode, isGlossaryMode, currentQuestion, showResult, quiz]);
+    }, [currentSection, currentTopic, isQuizMode, isGlossaryMode, currentQuestion, showResult, quiz, isTwa]);
 
     // --- Ваши существующие функции навигации (без изменений) ---
     // ... (goToHome, startQuiz, resetQuiz и т.д.)
