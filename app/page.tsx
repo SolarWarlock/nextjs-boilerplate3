@@ -585,7 +585,7 @@ export default function Home() {
     );
 
 
-    // Обработчик кнопки "назад" для TWA
+    // Эффект для обработки кнопки "назад" в TWA приложении
     useEffect(() => {
         const handleBackButton = (event: Event) => {
             // Предотвращаем стандартное поведение (выход из приложения)
@@ -614,40 +614,29 @@ export default function Home() {
                 goToHome();
             } else {
                 // На главной странице - стандартное поведение (выход)
-                // Для TWA приложения можно использовать window.close()
-                if (isTwa) {
-                    // В TWA приложении показываем подтверждение выхода
-                    if (window.confirm('Вы уверены, что хотите выйти из приложения?')) {
-                        // Закрываем приложение
-                        if (window.close) {
-                            window.close();
-                        } else {
-                            // Fallback для браузеров, которые не поддерживают window.close()
-                            window.history.back();
-                        }
+                // Можно показать подтверждение выхода
+                if (window.confirm('Вы уверены, что хотите выйти из приложения?')) {
+                    // Для TWA приложения можно использовать window.close()
+                    // или оставить стандартное поведение
+                    if (isTwa) {
+                        window.close();
+                    } else {
+                        window.history.back();
                     }
-                } else {
-                    // В обычном браузере - стандартное поведение
-                    window.history.back();
                 }
             }
         };
 
-        // Добавляем обработчик события backbutton (для Cordova/Capacitor)
-        document.addEventListener('backbutton', handleBackButton, false);
-
-        // Также обрабатываем событие popstate (нажатие кнопки назад в браузере)
-        const handlePopState = (event: PopStateEvent) => {
-            event.preventDefault();
-            handleBackButton(new Event('backbutton'));
-        };
-
-        window.addEventListener('popstate', handlePopState);
+        // Добавляем обработчик события только если это TWA
+        if (isTwa) {
+            document.addEventListener('backbutton', handleBackButton, false);
+        }
 
         // Очистка при размонтировании компонента
         return () => {
-            document.removeEventListener('backbutton', handleBackButton, false);
-            window.removeEventListener('popstate', handlePopState);
+            if (isTwa) {
+                document.removeEventListener('backbutton', handleBackButton, false);
+            }
         };
     }, [currentSection, currentTopic, isQuizMode, isGlossaryMode, currentQuestion, showResult, quiz, isTwa]);
 

@@ -16,20 +16,19 @@
             android:theme="@style/AppTheme.NoActionBarLaunch"
             android:launchMode="singleTask"
             android:exported="true"
-            android:hardwareAccelerated="true"
-            android:windowSoftInputMode="adjustResize">
+            android:enableOnBackInvokedCallback="true">
 
 			<intent-filter android:autoVerify="true">
 				<action android:name="android.intent.action.MAIN" />
 				<category android:name="android.intent.category.LAUNCHER" />
 			</intent-filter>
 
-			<intent-filter>
+			<intent-filter android:autoVerify="true">
 				<action android:name="android.intent.action.VIEW" />
 				<category android:name="android.intent.category.DEFAULT" />
 				<category android:name="android.intent.category.BROWSABLE" />
 				<data android:scheme="https"
-                      android:host="your-domain.com" />
+                      android:host="ваш-домен.com" />
 			</intent-filter>
 
 		</activity>
