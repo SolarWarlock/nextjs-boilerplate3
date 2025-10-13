@@ -802,7 +802,7 @@ export default function Home() {
             <div className="min-h-screen bg-amber-50">
                 <div className="container mx-auto px-4 py-8 max-w-4xl">
                     <div className="mb-6"><button onClick={goToSection} className="mb-4 flex items-center text-amber-800 hover:text-amber-900"><ArrowLeft className="w-4 h-4 mr-2" />Назад к разделу "{currentSection.title}"</button></div>
-                    <article className="bg-amber-100 border border-amber-200 rounded-lg shadow-lg p-6">
+                    <article className="bg-amber-100 border border-amber-200 rounded-lg shadow-lg p-6 select-text">
                         <div className="mb-6"><Image src={currentTopic.image} alt={currentTopic.title} width={800} height={400} className="w-full h-64 object-cover rounded-lg border-2 border-amber-300"/></div>
                         <div className="prose prose-lg max-w-none">
                             <h1 className="text-3xl font-bold mb-4 text-amber-900">{currentTopic.title}</h1>
@@ -935,9 +935,13 @@ export default function Home() {
                     {sections.map((section) => (
                         <div key={section.id} className="cursor-pointer border border-amber-200 rounded-lg p-6 hover:shadow-lg transition-all duration-200 bg-amber-100 hover:bg-amber-200" onClick={() => setCurrentSection(section)}>
                             <div className="mb-4">
-                                <div className="flex items-center gap-4">
-                                    <div className="p-3 bg-amber-200 rounded-lg"><Image src={section.icon} alt={`${section.title} icon`} width={32} height={32}/></div>
-                                    <div><h3 className="text-xl font-semibold text-amber-900">{section.title}</h3></div>
+                                <div className="flex items-start gap-4"> {/* Изменено: items-center -> items-start */}
+                                    <div className="p-3 bg-amber-200 rounded-lg flex-shrink-0"> {/* Добавлено: flex-shrink-0 */}
+                                        <Image src={section.icon} alt={`${section.title} icon`} width={32} height={32}/>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xl font-semibold text-amber-900">{section.title}</h3>
+                                    </div>
                                 </div>
                             </div>
                             <div>
