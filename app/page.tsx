@@ -584,73 +584,66 @@ export default function Home() {
         currentSection && isGlossaryMode ? currentSection.glossaryFile : null
     );
 
-
     useEffect(() => {
-        const handleBackButton = (event: Event) => {
-            event.preventDefault();
-
-            // Простая логика навигации
-            if (isQuizMode) {
-                exitQuiz();
-            } else if (isGlossaryMode) {
+        const handleBack = () => {
+            // Обрабатываем навигацию в зависимости от текущего состояния
+            if (isQuizMode && currentSection) {
+                if (showResult) {
+                    exitQuiz();
+                } else if (currentQuestion > 0) {
+                    prevQuestion(quiz);
+                } else {
+                    exitQuiz();
+                }
+            } else if (isGlossaryMode && currentSection) {
                 exitGlossary();
-            } else if (currentTopic) {
+            } else if (currentTopic && currentSection) {
                 goToSection();
             } else if (currentSection) {
                 goToHome();
             } else {
-                // На главной странице - подтверждение выхода
-                if (window.confirm('Вы уверены, что хотите выйти из приложения?')) {
-                    if (isTwa) {
-                        window.close();
-                    } else {
-                        window.history.back();
-                    }
-                }
+                // На главной странице - стандартное поведение
+                return false;
+            }
+            return true; // Предотвращаем стандартное поведение
+        };
+
+        // Обработчик для браузера
+        const handlePopState = (event: PopStateEvent) => {
+            if (handleBack()) {
+                // Если обработали навигацию, предотвращаем стандартное поведение
+                event.preventDefault();
+                // Добавляем новую запись в историю, чтобы браузер не ушел назад
+                window.history.pushState(null, '', window.location.href);
             }
         };
 
-        // Добавляем обработчик события только в TWA режиме
+        // Обработчик для TWA
+        const handleBackButton = (event: Event) => {
+            if (handleBack()) {
+                event.preventDefault();
+            }
+        };
+
+        // Добавляем обработчики
+        window.addEventListener('popstate', handlePopState);
+
+        // Для TWA приложения
         if (isTwa) {
             document.addEventListener('backbutton', handleBackButton, false);
         }
 
+        // Инициализируем историю
+        window.history.pushState(null, '', window.location.href);
+
+        // Очистка
         return () => {
+            window.removeEventListener('popstate', handlePopState);
             if (isTwa) {
                 document.removeEventListener('backbutton', handleBackButton, false);
             }
         };
-    }, [currentSection, currentTopic, isQuizMode, isGlossaryMode, isTwa]);
-    // Эффект для обработки браузерной кнопки "назад"
-    useEffect(() => {
-        const handleBrowserBack = (event: PopStateEvent) => {
-            // Та же логика, что и для TWA
-            if (isQuizMode) {
-                event.preventDefault();
-                exitQuiz();
-            } else if (isGlossaryMode) {
-                event.preventDefault();
-                exitGlossary();
-            } else if (currentTopic) {
-                event.preventDefault();
-                goToSection();
-            } else if (currentSection) {
-                event.preventDefault();
-                goToHome();
-            }
-        };
-
-        // Добавляем обработчик для браузерной версии
-        if (!isTwa) {
-            window.addEventListener('popstate', handleBrowserBack);
-        }
-
-        return () => {
-            if (!isTwa) {
-                window.removeEventListener('popstate', handleBrowserBack);
-            }
-        };
-    }, [currentSection, currentTopic, isQuizMode, isGlossaryMode, isTwa]);
+    }, [currentSection, currentTopic, isQuizMode, isGlossaryMode, currentQuestion, showResult, quiz, isTwa]);
 
     // --- Ваши существующие функции навигации (без изменений) ---
     // ... (goToHome, startQuiz, resetQuiz и т.д.)
