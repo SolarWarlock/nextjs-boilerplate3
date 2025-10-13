@@ -573,7 +573,10 @@ export default function Home() {
     const [selectedAnswer, setSelectedAnswer] = useState<any>(null);
     const [showResult, setShowResult] = useState(false);
     const [quizCompleted, setQuizCompleted] = useState(false);
-
+    useEffect(() => {
+        // Сбрасываем прокрутку в начало страницы при любом изменении навигации
+        window.scrollTo(0, 0);
+    }, [currentSection, currentTopic, isQuizMode, isGlossaryMode, currentQuestion, showResult]);
     const { quiz, loading: quizLoading, error: quizError } = useQuiz(
         currentSection && isQuizMode ? currentSection.quizFile : null
     );
@@ -801,7 +804,17 @@ export default function Home() {
         return (
             <div className="min-h-screen bg-amber-50">
                 <div className="container mx-auto px-4 py-8 max-w-4xl">
-                    <div className="mb-6"><button onClick={goToSection} className="mb-4 flex items-center text-amber-800 hover:text-amber-900"><ArrowLeft className="w-4 h-4 mr-2" />Назад к разделу "{currentSection.title}"</button></div>
+                    <div className="mb-6">
+                        <button
+                            onClick={goToSection}
+                            className="w-full text-left p-3 rounded-md border border-amber-300 hover:bg-amber-200 text-amber-800 transition-colors flex items-start gap-2"
+                        >
+                            <ArrowLeft className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                            <span className="flex-1 break-words">
+                                Назад к разделу "{currentSection.title}"
+                            </span>
+                        </button>
+                    </div>
                     <article className="bg-amber-100 border border-amber-200 rounded-lg shadow-lg p-6 select-text">
                         <div className="mb-6"><Image src={currentTopic.image} alt={currentTopic.title} width={800} height={400} className="w-full h-64 object-cover rounded-lg border-2 border-amber-300"/></div>
                         <div className="prose prose-lg max-w-none">
