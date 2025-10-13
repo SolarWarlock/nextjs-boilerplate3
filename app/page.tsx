@@ -548,21 +548,24 @@ export default function Home() {
     // Состояние для определения, запущено ли приложение как TWA (в оболочке)
     // Изначально null, чтобы кнопка не "моргала" при загрузке
     const [isTwa, setIsTwa] = useState<boolean | null>(null);
-
+    const [isMobileBrowser, setIsMobileBrowser] = useState(false);
     // Состояние для определения типа устройства (ПК или мобильный)
     const [isMobile, setIsMobile] = useState<boolean | null>(null);
 
     // Этот эффект выполняется один раз при загрузке страницы на клиенте
+
+    // В эффекте определения устройства добавьте:
     useEffect(() => {
-        // Проверяем, соответствует ли режим отображения 'standalone' (как у TWA)
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
         setIsTwa(isStandalone);
 
-        // Проверяем тип устройства по User Agent
-        const userAgent = typeof window.navigator === "undefined" ? "" : navigator.userAgent;
-        const mobile = Boolean(userAgent.match(/Android|BlackBerry|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i));
+        const userAgent = navigator.userAgent;
+        const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
         setIsMobile(mobile);
-    }, []); // Пустой массив зависимостей означает, что эффект запустится только один раз
+
+        // Определяем мобильный браузер (не TWA)
+        setIsMobileBrowser(mobile && !isStandalone);
+    }, []);
 
     const [currentSection, setCurrentSection] = useState<Section | null>(null);
     const [currentTopic, setCurrentTopic] = useState<Topic | null>(null);
