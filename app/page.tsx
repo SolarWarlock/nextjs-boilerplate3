@@ -585,39 +585,22 @@ export default function Home() {
     );
 
 
-    // Эффект для обработки кнопки "назад" в TWA приложении
     useEffect(() => {
         const handleBackButton = (event: Event) => {
-            // Предотвращаем стандартное поведение (выход из приложения)
             event.preventDefault();
 
-            // Обрабатываем навигацию в зависимости от текущего состояния
-            if (isQuizMode && currentSection) {
-                if (showResult) {
-                    // В режиме результатов теста - выходим из теста
-                    exitQuiz();
-                } else if (currentQuestion > 0) {
-                    // В режиме теста - переходим к предыдущему вопросу
-                    prevQuestion(quiz);
-                } else {
-                    // На первом вопросе - выходим из теста
-                    exitQuiz();
-                }
-            } else if (isGlossaryMode && currentSection) {
-                // В режиме глоссария - выходим из глоссария
+            // Простая логика навигации
+            if (isQuizMode) {
+                exitQuiz();
+            } else if (isGlossaryMode) {
                 exitGlossary();
-            } else if (currentTopic && currentSection) {
-                // В теме - возвращаемся к списку тем
+            } else if (currentTopic) {
                 goToSection();
             } else if (currentSection) {
-                // В списке тем - возвращаемся к разделам
                 goToHome();
             } else {
-                // На главной странице - стандартное поведение (выход)
-                // Можно показать подтверждение выхода
+                // На главной странице - подтверждение выхода
                 if (window.confirm('Вы уверены, что хотите выйти из приложения?')) {
-                    // Для TWA приложения можно использовать window.close()
-                    // или оставить стандартное поведение
                     if (isTwa) {
                         window.close();
                     } else {
@@ -627,18 +610,47 @@ export default function Home() {
             }
         };
 
-        // Добавляем обработчик события только если это TWA
+        // Добавляем обработчик события только в TWA режиме
         if (isTwa) {
             document.addEventListener('backbutton', handleBackButton, false);
         }
 
-        // Очистка при размонтировании компонента
         return () => {
             if (isTwa) {
                 document.removeEventListener('backbutton', handleBackButton, false);
             }
         };
-    }, [currentSection, currentTopic, isQuizMode, isGlossaryMode, currentQuestion, showResult, quiz, isTwa]);
+    }, [currentSection, currentTopic, isQuizMode, isGlossaryMode, isTwa]);
+    // Эффект для обработки браузерной кнопки "назад"
+    useEffect(() => {
+        const handleBrowserBack = (event: PopStateEvent) => {
+            // Та же логика, что и для TWA
+            if (isQuizMode) {
+                event.preventDefault();
+                exitQuiz();
+            } else if (isGlossaryMode) {
+                event.preventDefault();
+                exitGlossary();
+            } else if (currentTopic) {
+                event.preventDefault();
+                goToSection();
+            } else if (currentSection) {
+                event.preventDefault();
+                goToHome();
+            }
+        };
+
+        // Добавляем обработчик для браузерной версии
+        if (!isTwa) {
+            window.addEventListener('popstate', handleBrowserBack);
+        }
+
+        return () => {
+            if (!isTwa) {
+                window.removeEventListener('popstate', handleBrowserBack);
+            }
+        };
+    }, [currentSection, currentTopic, isQuizMode, isGlossaryMode, isTwa]);
 
     // --- Ваши существующие функции навигации (без изменений) ---
     // ... (goToHome, startQuiz, resetQuiz и т.д.)
