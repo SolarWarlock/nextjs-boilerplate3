@@ -590,64 +590,69 @@ export default function Home() {
 
     // Эффект для обработки кнопки "назад" в TWA
     useEffect(() => {
-        const handleBackButton = (event: Event) => {
-            // Предотвращаем стандартное поведение (выход из приложения)
+        const handlePopState = (event: PopStateEvent) => {
             event.preventDefault();
+            handleBackNavigation();
+        };
 
-            // Обрабатываем навигацию в зависимости от текущего состояния
+        const handleBackNavigation = () => {
             if (isQuizMode && currentSection) {
                 if (showResult) {
-                    // В режиме результатов теста - выходим из теста
                     exitQuiz();
                 } else if (currentQuestion > 0) {
-                    // В режиме теста - переходим к предыдущему вопросу
                     prevQuestion(quiz);
                 } else {
-                    // На первом вопросе - выходим из теста
                     exitQuiz();
                 }
             } else if (isGlossaryMode && currentSection) {
-                // В режиме глоссария - выходим из глоссария
                 exitGlossary();
             } else if (currentTopic && currentSection) {
-                // В теме - возвращаемся к списку тем
                 goToSection();
             } else if (currentSection) {
-                // В списке тем - возвращаемся к разделам
                 goToHome();
             } else {
-                // На главной странице - стандартное поведение (выход)
-                // Можно показать подтверждение выхода
-                if (window.confirm('Вы уверены, что хотите выйти из приложения?')) {
-                    // Для TWA приложения можно использовать window.close()
-                    // или оставить стандартное поведение
-                    if (isTwa) {
+                // На главной странице - добавляем состояние в историю
+                if (isTwa) {
+                    window.history.pushState(null, '', window.location.href);
+                    if (window.confirm('Вы уверены, что хотите выйти из приложения?')) {
                         window.close();
-                    } else {
-                        window.history.back();
                     }
                 }
             }
         };
 
-        // Добавляем обработчик события backbutton (для Cordova/Capacitor/TWA)
+        // Добавляем состояние в историю при загрузке
         if (isTwa) {
-            document.addEventListener('backbutton', handleBackButton, false);
+            window.history.pushState(null, '', window.location.href);
         }
 
-        // Также обрабатываем нажатие клавиши Escape для тестирования в браузере
-        const handleKeyDown = (event: KeyboardEvent) => {
-            if (event.key === 'Escape') {
-                handleBackButton(event);
-            }
+        // Обработчик popstate (когда пользователь нажимает назад)
+        window.addEventListener('popstate', handlePopState);
+
+        // Обработчик backbutton для Cordova/TWA
+        const handleBackButton = (event: Event) => {
+            event.preventDefault();
+            handleBackNavigation();
         };
 
-        document.addEventListener('keydown', handleKeyDown, false);
+        if (isTwa) {
+            document.addEventListener('backbutton', handleBackButton, false);
+            // Также пробуем добавить обработчик для beforeunload
+            window.addEventListener('beforeunload', (event) => {
+                if (currentSection || currentTopic || isQuizMode || isGlossaryMode) {
+                    event.preventDefault();
+                    event.returnValue = '';
+                    handleBackNavigation();
+                }
+            });
+        }
 
-        // Очистка при размонтировании компонента
         return () => {
-            document.removeEventListener('backbutton', handleBackButton, false);
-            document.removeEventListener('keydown', handleKeyDown, false);
+            window.removeEventListener('popstate', handlePopState);
+            if (isTwa) {
+                document.removeEventListener('backbutton', handleBackButton, false);
+                window.removeEventListener('beforeunload', (event) => { });
+            }
         };
     }, [currentSection, currentTopic, isQuizMode, isGlossaryMode, currentQuestion, showResult, quiz, isTwa]);
 
