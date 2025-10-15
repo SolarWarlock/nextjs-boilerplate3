@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link'; // Link для навигации
 
-// --- Иконки ---
+// Иконки
 const ArrowRight = ({ className }: { className?: string }) => (
     <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="m12 19 7-7-7-7" />
@@ -543,7 +543,7 @@ const sections: Section[] = [
 ];
 
 export default function Home() {
-    // Состояние для определения, запущено ли приложение как TWA (в оболочке)
+    // Состояние для определения, запущено ли приложение в оболочке
     // Изначально null, чтобы кнопка не "моргала" при загрузке
     const [isTwa, setIsTwa] = useState<boolean | null>(null);
 
@@ -552,11 +552,11 @@ export default function Home() {
 
     // Этот эффект выполняется один раз при загрузке страницы на клиенте
     useEffect(() => {
-        // Проверяем, соответствует ли режим отображения 'standalone' (как у TWA)
+        // Проверка соответствия режима отображения 'standalone'
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
         setIsTwa(isStandalone);
 
-        // Проверяем тип устройства по User Agent
+        // Проверка типа устройства по User Agent
         const userAgent = typeof window.navigator === "undefined" ? "" : navigator.userAgent;
         const mobile = Boolean(userAgent.match(/Android|BlackBerry|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i));
         setIsMobile(mobile);
@@ -572,7 +572,7 @@ export default function Home() {
     const [showResult, setShowResult] = useState(false);
     const [quizCompleted, setQuizCompleted] = useState(false);
     useEffect(() => {
-        // Сбрасываем прокрутку в начало страницы при любом изменении навигации
+        // Сброс прокрутки в начало страницы при любом изменении навигации
         window.scrollTo(0, 0);
     }, [currentSection, currentTopic, isQuizMode, isGlossaryMode, currentQuestion, showResult]);
     const { quiz, loading: quizLoading, error: quizError } = useQuiz(
@@ -584,7 +584,7 @@ export default function Home() {
 
     useEffect(() => {
         const handleBack = () => {
-            // Обрабатываем навигацию в зависимости от текущего состояния
+            // Обработка навигации в зависимости от текущего состояния
             if (isQuizMode && currentSection) {
                 if (showResult) {
                     exitQuiz();
@@ -603,35 +603,35 @@ export default function Home() {
                 // На главной странице - стандартное поведение
                 return false;
             }
-            return true; // Предотвращаем стандартное поведение
+            return true; // Предотвращение стандартное поведение
         };
 
         // Обработчик для браузера
         const handlePopState = (event: PopStateEvent) => {
             if (handleBack()) {
-                // Если обработали навигацию, предотвращаем стандартное поведение
+                // Если обработана навигация, то предотвращение стандартного поведения
                 event.preventDefault();
-                // Добавляем новую запись в историю, чтобы браузер не ушел назад
+                // Добавление новой записи в историю, чтобы браузер не ушел назад
                 window.history.pushState(null, '', window.location.href);
             }
         };
 
-        // Обработчик для TWA
+        // Обработчик для приложения
         const handleBackButton = (event: Event) => {
             if (handleBack()) {
                 event.preventDefault();
             }
         };
 
-        // Добавляем обработчики
+        // Обработчики
         window.addEventListener('popstate', handlePopState);
 
-        // Для TWA приложения
+        // Для мобильного приложения
         if (isTwa) {
             document.addEventListener('backbutton', handleBackButton, false);
         }
 
-        // Инициализируем историю
+        // Инициализация истории
         window.history.pushState(null, '', window.location.href);
 
         // Очистка
@@ -732,8 +732,7 @@ export default function Home() {
     };
 
 
-    // --- Вся ваша логика отображения  ---
-    //
+    // Логика отображения
     if (currentSection && isQuizMode) {
         if (quizLoading) {
             return <div className="min-h-screen bg-amber-50 flex justify-center items-center"><div className="text-amber-700">Загрузка теста...</div></div>;
@@ -941,14 +940,14 @@ export default function Home() {
         );
     }
 
-    // --- Главная страница с разделами ---
+    // Главная страница с разделами
     const DownloadButton = () => {
-        // Не рендерим кнопку, пока не определили окружение
+        // Иконнка не рендерится, пока не определено окружение
         if (isTwa === null || isTwa === true) {
             return null;
         }
 
-        // Если это мобильный браузер -> прямая ссылка на скачивание
+        // Если заходят с мобильного браузера -> прямая ссылка на скачивание
         if (isMobile) {
             return (
                 <a
@@ -962,7 +961,7 @@ export default function Home() {
             );
         }
 
-        // Если это ПК браузер -> ссылка на страницу с QR-кодом
+        // Если заходят с ПК браузера -> ссылка на страницу с QR-кодом
         return (
             <Link href="/download" className="flex items-center px-4 py-2 bg-amber-600 text-sm text-white rounded-md hover:bg-amber-700 transition-colors">
                 <QrCode className="w-5 h-5 mr-2" />
@@ -983,11 +982,11 @@ export default function Home() {
                         className="h-10 w-auto md:h-12" // Логотип высотой 40px (h-10) на мобильных и 48px (h-12) на десктопе
                         priority
                     />
-                    {/* Используем компонент DownloadButton для десктопа */}
+
                     <div className="hidden sm:flex items-center">
                         <DownloadButton />
                     </div>
-                    {/*Используем компонент DownloadButton для мобильных */}
+
                     <div className="sm:hidden flex items-center">
                         <DownloadButton />
                     </div>
