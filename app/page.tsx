@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import Link from 'next/link'; // ✅ Добавлен Link для навигации
+import Link from 'next/link'; // Link для навигации
 
 // --- Иконки ---
 const ArrowRight = ({ className }: { className?: string }) => (
@@ -61,7 +61,7 @@ const BookOpen = ({ className }: { className?: string }) => (
         <path d="M18 8v13" />
     </svg>
 );
-// ✅ Новая иконка для кнопки
+
 const QrCode = ({ className }: { className?: string }) => (
     <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <rect width="5" height="5" x="3" y="3" rx="1" />
@@ -83,8 +83,7 @@ const QrCode = ({ className }: { className?: string }) => (
     </svg>
 );
 
-// --- Ваши существующие интерфейсы (без изменений) ---
-// ... (все ваши интерфейсы: BaseQuestion, SingleChoiceQuestion и т.д.)
+
 interface BaseQuestion {
     id: string;
     question: string;
@@ -139,8 +138,7 @@ interface Section {
 }
 
 
-// --- Ваши существующие компоненты и хуки (без изменений) ---
-// ... (все ваши хуки и компоненты: TopicContent, useQuiz, FormattedText и т.д.)
+
 const TopicContent: React.FC<{ topic: Topic }> = ({ topic }) => {
     const { content, loading, error } = useTopicContent(topic.contentFile);
 
@@ -645,8 +643,7 @@ export default function Home() {
         };
     }, [currentSection, currentTopic, isQuizMode, isGlossaryMode, currentQuestion, showResult, quiz, isTwa]);
 
-    // --- Ваши существующие функции навигации (без изменений) ---
-    // ... (goToHome, startQuiz, resetQuiz и т.д.)
+
     const goToHome = () => {
         setCurrentSection(null);
         setCurrentTopic(null);
@@ -955,7 +952,7 @@ export default function Home() {
         if (isMobile) {
             return (
                 <a
-                    href="/KubanHistory.apk" // ✅ Прямой путь к вашему файлу в /public
+                    href="/KubanHistory.apk" //  Прямой путь к файлу в /public
                     download  // Этот атрибут указывает браузеру скачать файл
                     className="flex items-center px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 transition-colors"
                 >
@@ -1009,8 +1006,8 @@ export default function Home() {
                     {sections.map((section) => (
                         <div key={section.id} className="cursor-pointer border border-amber-200 rounded-lg p-6 hover:shadow-lg transition-all duration-200 bg-amber-100 hover:bg-amber-200" onClick={() => setCurrentSection(section)}>
                             <div className="mb-4">
-                                <div className="flex items-start gap-4"> {/* Изменено: items-center -> items-start */}
-                                    <div className="p-3 bg-amber-200 rounded-lg flex-shrink-0"> {/* Добавлено: flex-shrink-0 */}
+                                <div className="flex items-start gap-4">
+                                    <div className="p-3 bg-amber-200 rounded-lg flex-shrink-0">
                                         <Image src={section.icon} alt={`${section.title} icon`} width={32} height={32}/>
                                     </div>
                                     <div>
@@ -1026,6 +1023,18 @@ export default function Home() {
                             </div>
                         </div>
                     ))}
+                </div>
+            </div>
+            <div className="mt-12 pb-6 px-4">
+                <div className="container mx-auto">
+                    <div className="text-center md:text-right">
+                        <p className="text-amber-600 text-sm">
+                            Емтыль З. Я.
+                        </p>
+                        <p className="text-amber-600 text-sm">
+                            Хотина Ю.В.
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
