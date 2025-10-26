@@ -1,5 +1,12 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      // Алиас @/ указывает на все файлы в корне
+      "@/*": ["*"]
+      // если файлы в папке `src`:
+      // "@/*": ["src/*"]
+    },
     "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
