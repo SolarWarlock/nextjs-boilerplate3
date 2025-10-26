@@ -979,7 +979,7 @@ export default function Home() {
                         alt="История Кубани"
                         width={200}
                         height={50}
-                        className="h-10 w-auto md:h-12" // Логотип высотой 40px (h-10) на мобильных и 48px (h-12) на десктопе
+                        className="h-10 w-auto md:h-12"
                         priority
                     />
 
