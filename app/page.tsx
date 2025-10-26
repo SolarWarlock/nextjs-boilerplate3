@@ -2,21 +2,21 @@
 
 import { useState, useEffect } from 'react';
 
-// Данные (используем @/ alias)
-import { sections } from '@/lib/data';
+// Данные
+import { sections } from 'app/lib/data';
 
-// Хуки (используем @/ alias)
-import { useQuiz } from '@/hooks/useQuiz';
-import { useGlossary } from '@/hooks/useGlossary';
-import { useAppNavigation } from '@/hooks/useAppNavigation';
-import { useQuizState } from '@/hooks/useQuizState';
+// Хуки
+import { useQuiz } from 'app/hooks/useQuiz';
+import { useGlossary } from 'app/hooks/useGlossary';
+import { useAppNavigation } from 'app/hooks/useAppNavigation';
+import { useQuizState } from 'app/hooks/useQuizState';
 
-// Компоненты View (используем @/ alias)
-import { HomeView } from '@/components/views/HomeView';
-import { SectionView } from '@/components/views/SectionView';
-import { TopicView } from '@/components/views/TopicView';
-import { GlossaryView } from '@/components/views/GlossaryView';
-import { QuizView } from '@/components/views/QuizView';
+// Компоненты View
+import { HomeView } from 'app/components/views/HomeView';
+import { SectionView } from 'app/components/views/SectionView';
+import { TopicView } from 'app/components/views/TopicView';
+import { GlossaryView } from 'app/components/views/GlossaryView';
+import { QuizView } from 'app/components/views/QuizView';
 
 export default function Home() {
     // --- Состояние окружения ---
@@ -35,7 +35,7 @@ export default function Home() {
 
     // --- Хуки ---
 
-    // 1. Хук Навигации (теперь простой)
+    // 1. Хук Навигации
     const {
         currentSection,
         currentTopic,
@@ -51,7 +51,7 @@ export default function Home() {
         selectTopic
     } = useAppNavigation();
 
-    // 2. Хуки Данных (зависят от хука навигации)
+    // 2. Хуки Данных
     const { quiz, loading: quizLoading, error: quizError } = useQuiz(
         currentSection && isQuizMode ? currentSection.quizFile : null
     );
@@ -59,7 +59,7 @@ export default function Home() {
         currentSection && isGlossaryMode ? currentSection.glossaryFile : null
     );
 
-    // 3. Хук Состояния Теста (зависит от хука данных)
+    // 3. Хук Состояния Теста
     const {
         currentQuestion,
         userAnswers,
@@ -69,11 +69,10 @@ export default function Home() {
         nextQuestion,
         prevQuestion,
         restartQuiz
-    } = useQuizState(quiz); // Передаем данные теста в хук состояния
+    } = useQuizState(quiz); // данные теста передаются в хук состояния
 
 
     // --- Эффект для кнопки "Назад" ---
-    // (Теперь он живет здесь, т.к. page.tsx знает обо всех состояниях)
     useEffect(() => {
         const handleBack = () => {
             // Обработка навигации в зависимости от текущего состояния
@@ -135,7 +134,7 @@ export default function Home() {
 
     // --- Логика отображения (Маршрутизация) ---
 
-    // 1. Показываем Тест
+    // 1. Показ теста
     if (currentSection && isQuizMode) {
         return (
             <QuizView
@@ -149,7 +148,6 @@ export default function Home() {
                 showResult={showResult}
                 onExitQuiz={() => {
                     exitQuiz();
-                    // Также сбрасываем состояние теста при выходе
                     restartQuiz();
                 }}
                 onRestartQuiz={restartQuiz}
@@ -160,7 +158,7 @@ export default function Home() {
         );
     }
 
-    // 2. Показываем Тему (Статью)
+    // 2. Показ темы (статьи)
     if (currentTopic && currentSection) {
         return (
             <TopicView
@@ -171,7 +169,7 @@ export default function Home() {
         );
     }
 
-    // 3. Показываем Глоссарий
+    // 3. Показ глоссария
     if (currentSection && isGlossaryMode) {
         return (
             <GlossaryView
@@ -184,7 +182,7 @@ export default function Home() {
         );
     }
 
-    // 4. Показываем Раздел (Список тем)
+    // 4. Показ раздела (списка тем)
     if (currentSection) {
         return (
             <SectionView
@@ -193,7 +191,7 @@ export default function Home() {
                 onShowGlossary={showGlossary}
                 onStartQuiz={() => {
                     startQuiz();
-                    // Сбрасываем состояние теста на случай, если он был пройден
+                    // Сброс состояния теста на случай, если он был пройден
                     restartQuiz();
                 }}
                 onSelectTopic={selectTopic}
@@ -201,7 +199,7 @@ export default function Home() {
         );
     }
 
-    // 5. Показываем Главную страницу (Список разделов)
+    // 5. Показ главной страницы (Списка разделов)
     return (
         <HomeView
             sections={sections}

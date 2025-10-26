@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Section, Topic } from '@/lib/types';
+import { Section, Topic } from 'app/lib/types';
 
 // Этот хук теперь управляет *только* навигацией по приложению
 export const useAppNavigation = () => {

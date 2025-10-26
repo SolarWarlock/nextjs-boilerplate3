@@ -1,5 +1,5 @@
 import { Section } from './types';
-const sections: Section[] = [
+export const sections: Section[] = [
     {
         id: 'ancient',
         title: 'Кубань в древности',

@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Quiz, Question } from '@/lib/types';
-import { getInitialAnswerState } from '@/lib/quizUtils';
+import { Quiz, Question } from 'app/lib/types';
+import { getInitialAnswerState } from 'app/lib/quizUtils';
 
 // Этот хук будет управлять состоянием *во время* прохождения теста
 export const useQuizState = (quiz: Quiz | null) => {

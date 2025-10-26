@@ -5,8 +5,7 @@ import { useTopicContent } from '../../hooks/useTopicContent';
 import { FormattedText } from '../content/FormattedText';
 import { ArrowLeft } from '../icons';
 
-// Вложенный компонент, как в оригинальном файле, но теперь он
-// импортирует хук useTopicContent и компонент FormattedText
+
 const TopicContent: React.FC<{ topic: Topic }> = ({ topic }) => {
     const { content, loading, error } = useTopicContent(topic.contentFile);
 

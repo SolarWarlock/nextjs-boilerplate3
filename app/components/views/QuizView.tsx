@@ -40,7 +40,7 @@ export const QuizView: React.FC<QuizViewProps> = ({
                                                       onPrevQuestion
                                                   }) => {
 
-    // --- Вспомогательные функции, перенесенные из page.tsx ---
+    // Вспомогательные функции
 
     const calculateScore = (quizData: Quiz) => {
         let correct = 0;
