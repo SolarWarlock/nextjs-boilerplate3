@@ -97,10 +97,10 @@ export const HomeView: React.FC<HomeViewProps> = ({ sections, onSelectSection, i
             <div className="mt-12 pb-6 px-4">
                 <div className="container mx-auto">
                     <div className="text-center md:text-right">
-                        <p className="text-amber-600 text-sm">
+                        <p className="text-xl font-semibold text-amber-900">
                             Емтыль З. Я.
                         </p>
-                        <p className="text-amber-600 text-sm">
+                        <p className="text-xl font-semibold text-amber-900">
                             Хотина Ю.В.
                         </p>
                     </div>
