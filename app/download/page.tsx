@@ -29,7 +29,7 @@ export default function DownloadPage() {
 
                     <div className="flex justify-center mb-6">
                         <Image
-                            src="/images/QRcode_apk.png"
+                            src="/images/QRcode_download_apk.png"
                             alt="QR-код для скачивания APK"
                             width={400}
                             height={400}
